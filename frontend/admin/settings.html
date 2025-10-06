@@ -30,24 +30,41 @@
                 </div>
 
                 <div class="collapsible-section">
-                    <a href="#" id="toggle-contacts-btn" class="toggle-link">Контакты [скрыть]</a>
+                    <a href="#" id="toggle-contacts-btn" class="toggle-link">Контакты (главная страница) [скрыть]</a>
                     <div id="contact-fields-container">
+                        
                         <div class="setting-item-input icon-input">
-                            <label for="contact-whatsapp-display"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="Phone">Номер WhatsApp</label>
-                            <input type="text" id="contact-whatsapp-display" data-key="contact_whatsapp_display" placeholder="Например, +7 702 ...">
+                            <label for="contact-whatsapp-display">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="Phone">
+                                Отображаемый номер WhatsApp
+                            </label>
+                            <input type="text" id="contact-whatsapp-display" data-key="contact_whatsapp_display" placeholder="Например, +7 700 123 45 67">
                         </div>
+
                         <div class="setting-item-input icon-input">
-                            <label for="contact-whatsapp"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="WhatsApp">Ссылка на контакт для связи WhatsApp</label>
-                            <input type="text" id="contact-whatsapp" data-key="contact_whatsapp" placeholder="https://wa.me/7702...">
+                            <label for="contact-whatsapp">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="WhatsApp">
+                                Ссылка для связи WhatsApp (wa.me)
+                            </label>
+                            <input type="text" id="contact-whatsapp" data-key="contact_whatsapp" placeholder="https://wa.me/77001234567">
                         </div>
+
                         <div class="setting-item-input icon-input">
-                            <label for="contact-instagram"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="admin-contact-icon" alt="Instagram">Ссылка на Instagram</label>
-                            <input type="text" id="contact-instagram" data-key="contact_instagram" placeholder="https://instagram.com/...">
+                            <label for="contact-instagram">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="admin-contact-icon" alt="Instagram">
+                                Ссылка на Instagram
+                            </label>
+                            <input type="text" id="contact-instagram" data-key="contact_instagram" placeholder="https://instagram.com/username">
                         </div>
+
                         <div class="setting-item-input icon-input">
-                            <label for="contact-telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="admin-contact-icon" alt="Telegram">Ссылка на контакт в Telegram</label>
-                            <input type="text" id="contact-telegram" data-key="contact_telegram" placeholder="https://t.me/...">
+                            <label for="contact-telegram">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="admin-contact-icon" alt="Telegram">
+                                Ссылка на контакт в Telegram
+                            </label>
+                            <input type="text" id="contact-telegram" data-key="contact_telegram" placeholder="https://t.me/username">
                         </div>
+
                         <button id="save-settings-btn" class="save-button" style="margin-top: 15px;">Сохранить контакты</button>
                         <p id="settings-saved-message" style="color: green; text-align: center; margin-top: 10px;"></p>
                     </div>
