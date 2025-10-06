@@ -1,0 +1,21 @@
+# Файлы виртуального окружения Python
+.venv/
+venv/
+
+# Секретные данные
+config.py
+
+# Файлы баз данных
+*.db
+*.sqlite3
+
+# Исполняемые файлы (например, ngrok)
+*.exe
+
+# Системные файлы macOS и Windows
+.DS_Store
+Thumbs.db
+
+# Кэш Python
+__pycache__/
+*.pyc

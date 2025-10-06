@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить товар</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="burger-overlay" class="burger-overlay"></div>
+    <div id="burger-menu" class="burger-menu">
+        <div class="burger-header"><div class="burger-title">Меню</div></div>
+        <a href="index.html" class="burger-item"><span class="burger-icon">🏠</span><span>Заказы</span></a>
+        <a href="add_product.html" class="burger-item"><span class="burger-icon">➕</span><span>Добавить товар</span></a>
+        <a href="edit_products.html" class="burger-item"><span class="burger-icon">✍🏻</span><span>Редактор товаров</span></a>
+        <a href="revision.html" class="burger-item"><span class="burger-icon">📝</span><span>Ревизия</span></a>
+        <a href="settings.html" class="burger-item"><span class="burger-icon">⚙️</span><span>Настройки</span></a>
+    </div>
+    
+    <div class="admin-container">
+        <header class="admin-header">
+            <button id="burger-btn" class="burger-btn">☰</button>
+            <h2>Новый товар</h2>
+            <a href="index.html" class="back-link">Назад к списку</a>
+        </header>
+        
+        <main>
+            <form id="add-product-form" class="product-form">
+                
+                <div class="form-section">
+                    <div class="form-row required">
+                        <label for="sku">Артикул</label>
+                        <input type="text" id="sku" required>
+                        <small>Уникальное значение. Например, 01-0001</small>
+                    </div>
+                    <div class="form-row required">
+                        <label for="name">Наименование товара</label>
+                        <input type="text" id="name" required>
+                    </div>
+                     <div class="form-row">
+                        <label for="image">Фотография</label>
+                        <input type="file" id="image" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-row required">
+                        <label for="price">Стоимость</label>
+                        <input type="number" id="price" required min="0" step="0.01">
+                    </div>
+                     <div class="form-row required">
+                        <label for="stock">Количество на складе</label>
+                        <input type="number" id="stock" required min="0" value="0">
+                        <small>Это количество не видят пользователи, нужно для инвентаризации.</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-row required">
+                        <label for="category">Категория</label>
+                        <div class="select-with-button">
+                            <select id="category" required></select>
+                            <button type="button" id="new-category-btn" class="btn-new">+</button>
+                        </div>
+                    </div>
+                    <div class="form-row required">
+                        <label for="subcategory">Подкатегория</label>
+                         <div class="select-with-button">
+                            <select id="subcategory" required disabled></select>
+                            <button type="button" id="new-subcategory-btn" class="btn-new" disabled>+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="save-button">Сохранить товар</button>
+                    <p id="form-error" class="error-text"></p>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script src="add_product.js"></script>
+    <script src="mobile-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="burger-overlay" class="burger-overlay"></div>
+    <div id="burger-menu" class="burger-menu">
+        <div class="burger-header"><div class="burger-title">Меню</div></div>
+        <a href="index.html" class="burger-item"><span class="burger-icon">🏠</span><span>Заказы</span></a>
+        <a href="add_product.html" class="burger-item"><span class="burger-icon">➕</span><span>Добавить товар</span></a>
+        <a href="edit_products.html" class="burger-item"><span class="burger-icon">✍🏻</span><span>Редактор товаров</span></a>
+        <a href="revision.html" class="burger-item"><span class="burger-icon">📝</span><span>Ревизия</span></a>
+        <a href="settings.html" class="burger-item"><span class="burger-icon">⚙️</span><span>Настройки</span></a>
+    </div>
+
+    <div id="login-section">
+        <div class="login-container">
+            <h2>Вход в панель администратора</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Логин:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Войти</button>
+            </form>
+            <p id="error-message" class="error-text"></p>
+        </div>
+    </div>
+
+    <div id="admin-section" class="hidden">
+        <div class="admin-container">
+            <header class="admin-header">
+                <button id="burger-btn" class="burger-btn">☰</button>
+                <h2>Панель управления</h2>
+                <div class="header-actions">
+                    <button id="add-product-btn" class="header-btn green">➕ Добавить товар</button>
+                    <a href="edit_products.html" class="header-btn">✍🏻 Редактор товаров</a>
+                    <button id="revision-btn" class="header-btn blue">📝 Ревизия</button>
+                    <button id="logout-button">Выйти</button>
+                </div>
+            </header>
+            
+            <div class="settings-panel">
+                <h3>Глобальные настройки</h3>
+                <div class="setting-item">
+                    <label for="show-stock-toggle">Отображать остатки на сайте для пользователей <small class="status-text">(скоро...)</small></label>
+                    <label class="switch">
+                        <input type="checkbox" id="show-stock-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="allow-negative-stock-toggle">Разрешить продажу при нулевом/отрицательном остатке <small class="status-text">(скоро...)</small></label>
+                    <label class="switch">
+                        <input type="checkbox" id="allow-negative-stock-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="collapsible-section">
+                    <details>
+                        <summary>
+                            <a href="#" class="toggle-link">Контакты (главная страница)</a>
+                        </summary>
+                        <div class="form-section" style="margin-top: 15px;">
+                             <div class="form-row icon-input">
+                                <label for="contact-whatsapp"><span>📞</span> WhatsApp</label>
+                                <input type="text" id="contact-whatsapp" placeholder="+7 777 123 4567">
+                            </div>
+                            <div class="form-row icon-input">
+                                <label for="contact-instagram"><span>📸</span> Instagram</label>
+                                <input type="text" id="contact-instagram" placeholder="https://instagram.com/username">
+                            </div>
+                            <div class="form-row icon-input">
+                                <label for="contact-telegram"><span>✈️</span> Telegram</label>
+                                <input type="text" id="contact-telegram" placeholder="https://t.me/username">
+                            </div>
+                            <button id="save-contacts-btn" style="width: auto; margin-top: 10px;">Сохранить контакты</button>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <div class="status-filters"></div>
+            
+            <main>
+                <div class="orders-section" data-status="new">
+                    <h3 class="section-title">Новые заказы</h3>
+                    <table class="orders-table">
+                        <thead><tr><th>ID</th><th>Номер заказа</th><th>Клиент</th><th>Сумма</th><th>Дата создания</th><th>Действия</th></tr></thead>
+                        <tbody id="new-orders-tbody"></tbody>
+                    </table>
+                    <div id="new-orders-mobile" class="mobile-orders-container"></div>
+                </div>
+
+                <div class="orders-section" data-status="processed">
+                    <h3 class="section-title">Обработанные</h3>
+                    <table class="orders-table">
+                        <thead><tr><th>ID</th><th>Номер заказа</th><th>Клиент</th><th>Сумма</th><th>Дата обработки</th><th>Действия</th></tr></thead>
+                        <tbody id="processed-orders-tbody"></tbody>
+                    </table>
+                    <div id="processed-orders-mobile" class="mobile-orders-container"></div>
+                </div>
+
+                <div class="orders-section" data-status="completed">
+                    <h3 class="section-title">Завершённые (со списанием остатков)</h3>
+                    <table class="orders-table">
+                        <thead><tr><th>ID</th><th>Номер заказа</th><th>Клиент</th><th>Сумма</th><th>Дата завершения</th><th>Действия</th></tr></thead>
+                        <tbody id="completed-orders-tbody"></tbody>
+                    </table>
+                    <div id="completed-orders-mobile" class="mobile-orders-container"></div>
+                </div>
+                
+                <div class="orders-section" data-status="returned">
+                    <h3 class="section-title">Возвратные (с возвратом остатков)</h3>
+                    <table class="orders-table">
+                         <thead><tr><th>ID</th><th>Номер заказа</th><th>Клиент</th><th>Сумма</th><th>Дата возврата</th><th>Действия</th></tr></thead>
+                        <tbody id="returned-orders-tbody"></tbody>
+                    </table>
+                    <div id="returned-orders-mobile" class="mobile-orders-container"></div>
+                </div>
+            </main>
+            <footer class="date-nav">
+                <button id="prev-day-btn" class="nav-arrow">&larr;</button>
+                <h3 id="current-date-display">Сегодня</h3>
+                <button id="next-day-btn" class="nav-arrow">&rarr;</button>
+            </footer>
+        </div>
+    </div>
+
+    <div class="screen hidden" id="order-editor-screen">
+        <div class="editor-header">
+            <button class="back-to-list-btn">‹ Назад</button>
+            <div class="header-title">
+                <h1 id="editor-order-number">Заказ №...</h1>
+                <span id="editor-order-status">Редактирование</span>
+            </div>
+        </div>
+        <div class="editor-content">
+            <div class="editor-section">
+                <h2 class="editor-section-title">Детали заказа</h2>
+                <div class="details-grid">
+                    <span>Клиент:</span>     <strong id="editor-customer-name"></strong>
+                    <span>Телефон:</span>    <a href="#" id="editor-customer-phone"></a>
+                    <span id="editor-comment-label" class="hidden">Примечание:</span> <span id="editor-customer-comment" class="hidden"></span>
+                    <span>Скидка (%):</span> <input type="number" id="editor-discount" class="editor-input-inline" value="0">
+                </div>
+            </div>
+            <div class="editor-section">
+                <h2 class="editor-section-title">Состав заказа</h2>
+                <div id="editor-items-container"></div>
+            </div>
+            <div class="editor-section">
+                <div class="summary-grid">
+                    <span>Сумма без скидки:</span> <strong id="summary-gross-total">0.00 ₸</strong>
+                    <span id="summary-discount-label" class="hidden">Скидка:</span> <strong id="summary-discount-amount" class="hidden">0.00 ₸</strong>
+                    <span class="summary-highlight-green">Итого со скидкой:</span> <strong class="summary-highlight-green" id="summary-net-total">0.00 ₸</strong>
+                </div>
+                <div id="editor-return-section" class="hidden" style="margin-top: 15px;">
+                     <div class="summary-grid">
+                        <span class="summary-highlight-orange">Итого возврат:</span> <strong class="summary-highlight-orange" id="summary-return-total">0.00 ₸</strong>
+                    </div>
+                    <label class="editor-checkbox-label">
+                        <input type="checkbox" id="editor-return-no-discount">
+                        Возврат без учёта скидки
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="editor-footer">
+            <button id="editor-btn-copy" class="editor-btn editor-btn-outline">Копировать ссылку</button>
+            <button id="editor-btn-print" class="editor-btn editor-btn-outline">Печать</button>
+        </div>
+    </div>
+    
+    <div id="printable-invoice-container" style="display:none;"></div>
+
+    <script src="app.js"></script>
+    <script src="mobile-nav.js"></script> 
+</body>
+</html>

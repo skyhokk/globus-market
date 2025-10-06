@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Telegram Login</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        #result { margin-top: 2em; padding: 1em; border: 1px solid #ccc; background-color: #f0f0f0; white-space: pre-wrap; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+    <h1>Тест авторизации Telegram</h1>
+    
+    <script async src="https://telegram.org/js/telegram-widget.js?22" 
+            data-telegram-login="Kosmos_Company_kz_bot" 
+            data-size="large" 
+            data-onauth="onTelegramAuth(user)" 
+            data-request-access="write">
+    </script>
+
+    <div id="result">
+        Здесь появится результат авторизации...
+    </div>
+
+    <script>
+        function onTelegramAuth(user) {
+            // Эта функция вызывается автоматически после успешного входа
+            console.log('Получены данные от Telegram:', user);
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = 'Проверяем данные на бэкенде...';
+
+            // Отправляем полученные от Telegram данные на наш бэкенд
+            fetch('/auth/telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Получен ответ от бэкенда:', data);
+                if (data.access_token) {
+                    // Сохраняем токен в "памяти" браузера
+                    localStorage.setItem('accessToken', data.access_token);
+                    
+                    resultDiv.innerHTML = `
+                        <strong>Авторизация прошла успешно!</strong><br><br>
+                        <strong>Пользователь:</strong> ${data.user.first_name} (ID: ${data.user.id})<br>
+                        <strong>Скидка:</strong> ${data.user.discount}%<br><br>
+                        <strong>Ваш токен доступа (скопируйте его целиком):</strong><br>
+                        <code>${data.access_token}</code>
+                    `;
+                } else {
+                    resultDiv.innerText = 'Ошибка авторизации на бэкенде: ' + JSON.stringify(data);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                resultDiv.innerText = 'Произошла сетевая ошибка.';
+            });
+        }
+    </script>
+
+</body>
+</html>

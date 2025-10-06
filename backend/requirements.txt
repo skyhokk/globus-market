@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+reportlab
+openpyxl
+python-multipart
+Pillow
+passlib[bcrypt]
+bcrypt==3.2.0
+cffi
+PyJWT
+cryptography==38.0.4

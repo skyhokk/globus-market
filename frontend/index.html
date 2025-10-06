@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Globus Market</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="images/logo.jpg" alt="Логотип Хит Товары" class="logo-image">
+                <h1>Globus market</h1>
+            </div>
+            
+            <div id="contact-bar" class="contact-bar"></div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Поиск по названию или артикулу...">
+            </div>
+
+            <div id="category-navigation"></div>
+            
+        </header>
+
+        
+        <aside class="sidebar" id="categories-container">
+            </aside>
+
+        <main class="main-content" id="products-grid">
+            </main>
+    </div>
+
+    <div id="cart-modal" class="cart-modal-overlay hidden">
+        <div class="cart-modal-content">
+            <button id="close-cart-btn" class="cart-close-btn">&times;</button>
+            <h2>Ваш заказ</h2>
+            <div id="cart-items-container">
+                </div>
+            <div id="cart-summary">
+                 <p class="cart-total-price">Итого: <span id="cart-total">0</span> ₸</p>
+                 <form id="checkout-form">
+                    <h3>Данные для заказа</h3>
+                    <input type="text" id="customer-name" placeholder="Ваше имя" required>
+                    <input type="tel" id="customer-phone" placeholder="Ваш телефон" required>
+                    <textarea id="customer-comment" placeholder="Примечание к заказу (необязательно)"></textarea>
+                    <button type="submit">Оформить заказ</button>
+                </form>
+            </div>
+            <div id="cart-empty-message" class="hidden">
+                <p>Ваша корзина пуста</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="minimized-cart" class="minimized-cart-bar hidden">
+        <span id="minimized-cart-info"></span>
+        <a href="#" id="open-cart-link">Открыть корзину</a>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
