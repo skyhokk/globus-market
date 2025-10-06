@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = "https://globus-market-backend.onrender.com";
+    const API_BASE_URL = "https://globus-market-backend.onrender.com"; // Убедитесь, что здесь ваш рабочий URL
     const token = localStorage.getItem('accessToken');
 
     if (!token) {
@@ -7,8 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- ФУНКЦИИ ДЛЯ РАБОТЫ С НАСТРОЙКАМИ ---
+    // --- ЭЛЕМЕНТЫ DOM ---
+    const allToggles = document.querySelectorAll('.switch input[type="checkbox"]');
+    const saveContactsBtn = document.getElementById('save-settings-btn');
+    const savedMessage = document.getElementById('settings-saved-message');
 
+    // --- ФУНКЦИИ ---
+
+    // Функция для обновления текста у переключателей
     function updateToggleText(toggleElement) {
         const isChecked = toggleElement.checked;
         let statusTextElement, onText, offText;
@@ -26,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadAndApplySettings(token) {
+    // Загрузка и применение всех настроек
+    async function loadAndApplySettings() {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/settings`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -34,57 +41,70 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Не удалось загрузить настройки');
             const settings = await response.json();
             
-            const settingsInputs = document.querySelectorAll('.settings-panel input[data-key]');
             const settingsMap = new Map(settings.map(s => [s.key, s.value]));
             
-            settingsInputs.forEach(input => {
+            // Применяем значения к полям контактов
+            document.querySelectorAll('input[data-key]').forEach(input => {
                 const key = input.dataset.key;
                 if (settingsMap.has(key)) {
                     input.value = settingsMap.get(key);
                 }
             });
 
+            // Применяем значения к переключателям
             const showStockToggle = document.getElementById('show-stock-toggle');
-            showStockToggle.checked = settingsMap.get('show_stock_publicly') === 'true' || false;
+            showStockToggle.checked = settingsMap.get('show_stock_publicly') === 'true';
             updateToggleText(showStockToggle);
 
             const ignoreStockToggle = document.getElementById('ignore-stock-toggle');
-            ignoreStockToggle.checked = settingsMap.get('ignore_stock_limits') === 'true' || false;
+            ignoreStockToggle.checked = settingsMap.get('ignore_stock_limits') === 'true';
             updateToggleText(ignoreStockToggle);
+
         } catch (error) {
             console.error(error.message);
+            alert(`Ошибка загрузки настроек: ${error.message}`);
         }
     }
 
+    // Обработчик изменения состояния переключателя
     async function handleToggleChange(event) {
         const toggle = event.target;
         const newValue = toggle.checked;
-        updateToggleText(toggle);
+        updateToggleText(toggle); // Сразу обновляем текст
+        
         const keyMap = {
             'show-stock-toggle': 'show_stock_publicly',
             'ignore-stock-toggle': 'ignore_stock_limits'
         };
         const key = keyMap[toggle.id];
         if (!key) return;
+
         try {
-            await fetch(`${API_BASE_URL}/admin/settings/${key}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/settings/${key}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: newValue.toString() })
             });
+             if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Сервер ответил ошибкой');
+            }
+            // Можно добавить тихое уведомление об успехе
         } catch (error) {
-            alert(`Ошибка: ${error.message}`);
+            alert(`Ошибка сохранения настройки: ${error.message}`);
+            // В случае ошибки возвращаем переключатель в исходное состояние
             toggle.checked = !newValue;
             updateToggleText(toggle);
         }
     }
 
-    async function saveContactSettings() {
-        const inputs = document.querySelectorAll('.settings-panel input[data-key]');
-        const messageEl = document.getElementById('settings-saved-message');
-        if (!messageEl) return;
-        messageEl.textContent = 'Сохранение...';
+    // Сохранение всех контактов
+    async function saveAllContactSettings() {
+        const inputs = document.querySelectorAll('#contact-fields-container input[data-key]');
+        savedMessage.textContent = 'Сохранение...';
+        savedMessage.style.color = 'black';
 
+        // Создаем массив промисов для всех запросов
         const promises = Array.from(inputs).map(input => {
             const key = input.dataset.key;
             const value = input.value;
@@ -92,35 +112,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: value })
+            }).then(response => {
+                // Проверяем, что каждый отдельный запрос успешен
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
             });
         });
 
         try {
+            // Ожидаем выполнения всех запросов
             await Promise.all(promises);
-            messageEl.textContent = 'Настройки успешно сохранены!';
-            setTimeout(() => { messageEl.textContent = ''; }, 3000);
+            savedMessage.textContent = 'Контакты успешно сохранены!';
+            savedMessage.style.color = 'green';
         } catch (error) {
-            console.error('Ошибка сохранения настроек:', error);
-            messageEl.textContent = 'Ошибка сохранения!';
-            setTimeout(() => { messageEl.textContent = ''; }, 3000);
+            console.error('Ошибка сохранения контактов:', error);
+            const detail = error.detail || 'Произошла неизвестная ошибка';
+            savedMessage.textContent = `Ошибка: ${detail}`;
+            savedMessage.style.color = 'red';
+        } finally {
+            // Прячем сообщение через 3 секунды
+            setTimeout(() => { savedMessage.textContent = ''; }, 3000);
         }
     }
 
     // --- ПРИВЯЗКА СОБЫТИЙ ---
-    document.getElementById('show-stock-toggle').addEventListener('change', handleToggleChange);
-    document.getElementById('ignore-stock-toggle').addEventListener('change', handleToggleChange);
-    document.getElementById('save-settings-btn').addEventListener('click', saveContactSettings);
-    
-    const toggleContactsBtn = document.getElementById('toggle-contacts-btn');
-    const contactFieldsContainer = document.getElementById('contact-fields-container');
-    if (toggleContactsBtn && contactFieldsContainer) {
-        toggleContactsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isHidden = contactFieldsContainer.classList.toggle('hidden');
-            e.target.textContent = isHidden ? 'Контакты [показать]' : 'Контакты [скрыть]';
-        });
-    }
+    allToggles.forEach(toggle => {
+        toggle.addEventListener('change', handleToggleChange);
+    });
+    saveContactsBtn.addEventListener('click', saveAllContactSettings);
 
     // --- ПЕРВЫЙ ЗАПУСК ---
-    loadAndApplySettings(token);
+    loadAndApplySettings();
 });

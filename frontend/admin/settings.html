@@ -9,7 +9,13 @@
 <body>
     <div id="burger-overlay" class="burger-overlay"></div>
     <div id="burger-menu" class="burger-menu">
-        </div>
+        <div class="burger-header"><div class="burger-title">Меню</div></div>
+        <a href="index.html" class="burger-item"><span class="burger-icon">🏠</span><span>Заказы</span></a>
+        <a href="add_product.html" class="burger-item"><span class="burger-icon">➕</span><span>Добавить товар</span></a>
+        <a href="edit_products.html" class="burger-item"><span class="burger-icon">✍🏻</span><span>Редактор товаров</span></a>
+        <a href="revision.html" class="burger-item"><span class="burger-icon">📝</span><span>Ревизия</span></a>
+        <a href="settings.html" class="burger-item"><span class="burger-icon">⚙️</span><span>Настройки</span></a>
+    </div>
 
     <div class="admin-container">
         <header class="admin-header">
@@ -30,44 +36,31 @@
                 </div>
 
                 <div class="collapsible-section">
-                    <a href="#" id="toggle-contacts-btn" class="toggle-link">Контакты (главная страница) [скрыть]</a>
-                    <div id="contact-fields-container">
-                        
-                        <div class="setting-item-input icon-input">
-                            <label for="contact-whatsapp-display">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="Phone">
-                                Отображаемый номер WhatsApp
-                            </label>
-                            <input type="text" id="contact-whatsapp-display" data-key="contact_whatsapp_display" placeholder="Например, +7 700 123 45 67">
+                     <details open>
+                        <summary>
+                            <a href="#" class="toggle-link">Контакты (главная страница)</a>
+                        </summary>
+                        <div id="contact-fields-container">
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-whatsapp-display"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="Phone">Отображаемый номер WhatsApp</label>
+                                <input type="text" id="contact-whatsapp-display" data-key="contact_whatsapp_display" placeholder="Например, +7 700 ...">
+                            </div>
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-whatsapp"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="WhatsApp">Ссылка для связи WhatsApp</label>
+                                <input type="text" id="contact-whatsapp" data-key="contact_whatsapp" placeholder="https://wa.me/7700...">
+                            </div>
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-instagram"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="admin-contact-icon" alt="Instagram">Ссылка на Instagram</label>
+                                <input type="text" id="contact-instagram" data-key="contact_instagram" placeholder="https://instagram.com/...">
+                            </div>
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="admin-contact-icon" alt="Telegram">Ссылка на Telegram</label>
+                                <input type="text" id="contact-telegram" data-key="contact_telegram" placeholder="https://t.me/...">
+                            </div>
+                            <button id="save-settings-btn" class="save-button" style="margin-top: 15px;">Сохранить контакты</button>
+                            <p id="settings-saved-message" style="color: green; text-align: center; margin-top: 10px;"></p>
                         </div>
-
-                        <div class="setting-item-input icon-input">
-                            <label for="contact-whatsapp">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="WhatsApp">
-                                Ссылка для связи WhatsApp (wa.me)
-                            </label>
-                            <input type="text" id="contact-whatsapp" data-key="contact_whatsapp" placeholder="https://wa.me/77001234567">
-                        </div>
-
-                        <div class="setting-item-input icon-input">
-                            <label for="contact-instagram">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="admin-contact-icon" alt="Instagram">
-                                Ссылка на Instagram
-                            </label>
-                            <input type="text" id="contact-instagram" data-key="contact_instagram" placeholder="https://instagram.com/username">
-                        </div>
-
-                        <div class="setting-item-input icon-input">
-                            <label for="contact-telegram">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="admin-contact-icon" alt="Telegram">
-                                Ссылка на контакт в Telegram
-                            </label>
-                            <input type="text" id="contact-telegram" data-key="contact_telegram" placeholder="https://t.me/username">
-                        </div>
-
-                        <button id="save-settings-btn" class="save-button" style="margin-top: 15px;">Сохранить контакты</button>
-                        <p id="settings-saved-message" style="color: green; text-align: center; margin-top: 10px;"></p>
-                    </div>
+                    </details>
                 </div>
             </div>
         </main>
