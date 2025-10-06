@@ -13,12 +13,14 @@ import base64
 
 # --- ИЗМЕНЕНИЕ: Используем новую библиотеку PyJWT ---
 import jwt
+import os
 
 from app import models, schemas
 from app.dependencies import get_db
-from config import TELEGRAM_BOT_TOKEN
+
 from app.security import verify_password
 
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 router = APIRouter()
 
 SECRET_KEY = "your-super-secret-key"
