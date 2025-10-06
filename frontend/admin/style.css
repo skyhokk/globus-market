@@ -496,10 +496,12 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
 
 
 @media print {
+    /* --- СТАРЫЕ ПРАВИЛА (остаются без изменений) --- */
     body > .admin-container > header,
     body > .admin-container > footer,
     .action-buttons, .form-footer, .delete-item-link, .customer-details .form-row,
-    script, .settings-panel, .header-actions, .action-btn-group {
+    script, .settings-panel, .header-actions, .action-btn-group, .burger-btn, .burger-menu,
+    .revision-footer, #print-btn, .back-link-btn {
         display: none !important;
     }
     .admin-container {
@@ -521,10 +523,27 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
     .invoice-print-box .totals-section { margin-top: 15px; float: right; width: 45%; }
     .invoice-print-box .totals-section p { display: flex; justify-content: space-between; margin: 5px 0; font-size: 10pt; }
     .invoice-print-box .totals-section .final-total { font-weight: bold; font-size: 11pt; border-top: 1px solid #000; padding-top: 5px; }
+
+    /* --- НОВЫЕ ПРАВИЛА СПЕЦИАЛЬНО ДЛЯ СТРАНИЦЫ РЕВИЗИИ --- */
+    #revision-table {
+        font-size: 9pt; /* Уменьшаем шрифт, чтобы всё влезло */
+        width: 100%;
+        table-layout: auto; /* Позволяем браузеру самому подбирать ширину колонок */
+    }
+
+    #revision-table th, 
+    #revision-table td {
+        padding: 4px 6px; /* Уменьшаем отступы в ячейках */
+        word-wrap: break-word; /* Разрешаем перенос длинных слов в названии товара */
+    }
+    
     #revision-table .actual-stock-input {
-        border: none !important; background-color: #f8f9fa !important;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact;
-        border-bottom: 1px solid #333 !important; padding: 0;
+        width: 60px; /* Делаем поле для ввода поуже */
+        padding: 2px;
+        font-size: 9pt;
+        border: 1px solid #ccc !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
     }
 }
 
