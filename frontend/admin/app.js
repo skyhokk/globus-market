@@ -115,10 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
             initializeStatusFilters(orders);
 
         } catch (error) {
-            console.error("Ошибка при загрузке заказов:", error);
+            console.error("Ошибка при загрузке заказов:", error); // Оставляем ошибку в консоли для отладки
             tbodyIds.forEach(id => {
                 const tbody = document.getElementById(id);
-                if(tbody) tbody.innerHTML = `<tr><td colspan="6" style="color: red; text-align:center;">${error.message}</td></tr>`;
+                // Вместо ошибки выводим сообщение "Нет заказов"
+                if(tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Нет заказов</td></tr>`;
             });
         }
     }
