@@ -387,82 +387,125 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================================================
     
     function initializeSettingsPanel(token) {
-        const showStockToggle = document.getElementById('show-stock-toggle');
-        const allowNegativeStockToggle = document.getElementById('allow-negative-stock-toggle');
-        const contactWhatsapp = document.getElementById('contact-whatsapp');
-        const contactInstagram = document.getElementById('contact-instagram');
-        const contactTelegram = document.getElementById('contact-telegram');
-        const saveContactsBtn = document.getElementById('save-contacts-btn');
+        
+        // --- Вспомогательная функция для обновления текста у переключателей ---
+        function updateToggleText(toggleElement) {
+            const isChecked = toggleElement.checked;
+            let statusTextElement, onText, offText;
+            if (toggleElement.id === 'show-stock-toggle') {
+                statusTextElement = document.getElementById('show-stock-status-text');
+                onText = '[отображать]';
+                offText = '[не отображать]';
+            } else if (toggleElement.id === 'ignore-stock-toggle') {
+                statusTextElement = document.getElementById('ignore-stock-status-text');
+                onText = '[разрешено]';
+                offText = '[запрещено]';
+            }
+            if (statusTextElement) {
+                statusTextElement.textContent = isChecked ? onText : offText;
+            }
+        }
 
-        // 1. Загрузка текущих настроек
-        async function loadSettings() {
+        // --- 1. Загрузка и применение всех настроек ---
+        async function loadAndApplySettings() {
             try {
                 const response = await fetch(`${API_BASE_URL}/admin/settings`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error('Не удалось загрузить настройки');
                 const settings = await response.json();
-
-                // Применяем настройки к переключателям
-                showStockToggle.checked = settings.show_stock_globally || false;
-                allowNegativeStockToggle.checked = settings.allow_negative_stock_sale || false;
-
-                // Применяем контакты
-                if (settings.contacts) {
-                    contactWhatsapp.value = settings.contacts.whatsapp || '';
-                    contactInstagram.value = settings.contacts.instagram || '';
-                    contactTelegram.value = settings.contacts.telegram || '';
-                }
-            } catch (error) {
-                console.error("Ошибка загрузки настроек:", error);
-                // Можно показать ошибку пользователю
-            }
-        }
-
-        // 2. Функция для сохранения одной настройки
-        async function saveSetting(key, value) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/admin/settings`, {
-                    method: 'PATCH',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ [key]: value })
+                
+                const settingsMap = new Map(settings.map(s => [s.key, s.value]));
+                
+                // Применяем значения к полям контактов
+                document.querySelectorAll('input[data-key]').forEach(input => {
+                    const key = input.dataset.key;
+                    if (settingsMap.has(key)) {
+                        input.value = settingsMap.get(key);
+                    }
                 });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.detail || 'Не удалось сохранить настройку');
-                }
-                // Можно показать уведомление об успехе
+
+                // Применяем значения к переключателям
+                const showStockToggle = document.getElementById('show-stock-toggle');
+                showStockToggle.checked = settingsMap.get('show_stock_publicly') === 'true';
+                updateToggleText(showStockToggle);
+
+                const ignoreStockToggle = document.getElementById('ignore-stock-toggle');
+                ignoreStockToggle.checked = settingsMap.get('ignore_stock_limits') === 'true';
+                updateToggleText(ignoreStockToggle);
+
             } catch (error) {
-                console.error(`Ошибка сохранения настройки ${key}:`, error);
-                alert(`Ошибка: ${error.message}`);
-                loadSettings(); // Возвращаем к исходному состоянию в случае ошибки
+                console.error(error.message);
+                alert(`Ошибка загрузки настроек: ${error.message}`);
             }
         }
 
-        // 3. Привязка событий
-        showStockToggle.addEventListener('change', () => {
-            saveSetting('show_stock_globally', showStockToggle.checked);
-        });
+        // --- 2. Логика сохранения настроек ---
 
-        allowNegativeStockToggle.addEventListener('change', () => {
-            saveSetting('allow_negative_stock_sale', allowNegativeStockToggle.checked);
-        });
-
-        saveContactsBtn.addEventListener('click', async () => {
-            const contacts = {
-                whatsapp: contactWhatsapp.value,
-                instagram: contactInstagram.value,
-                telegram: contactTelegram.value
-            };
+        // Сохранение для переключателей
+        async function handleToggleChange(event) {
+            const toggle = event.target;
+            const newValue = toggle.checked;
+            updateToggleText(toggle);
             
-            saveContactsBtn.textContent = 'Сохранение...';
-            await saveSetting('contacts', contacts);
-            saveContactsBtn.textContent = 'Сохранить контакты';
-            alert('Контакты успешно сохранены!');
-        });
+            const keyMap = {
+                'show-stock-toggle': 'show_stock_publicly',
+                'ignore-stock-toggle': 'ignore_stock_limits'
+            };
+            const key = keyMap[toggle.id];
+            if (!key) return;
 
-        // 4. Первый запуск
-        loadSettings();
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/settings/${key}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: newValue.toString() })
+                });
+                if (!response.ok) throw new Error('Ошибка сохранения');
+            } catch (error) {
+                alert(`Ошибка: ${error.message}`);
+                toggle.checked = !newValue;
+                updateToggleText(toggle);
+            }
+        }
+
+        // Сохранение для всех контактов
+        async function saveAllContactSettings() {
+            const inputs = document.querySelectorAll('#contact-fields-container input[data-key]');
+            const savedMessage = document.getElementById('settings-saved-message');
+            savedMessage.textContent = 'Сохранение...';
+
+            const promises = Array.from(inputs).map(input => {
+                const key = input.dataset.key;
+                const value = input.value;
+                return fetch(`${API_BASE_URL}/admin/settings/${key}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: value })
+                }).then(response => {
+                    if (!response.ok) return Promise.reject('Ошибка сервера');
+                });
+            });
+
+            try {
+                await Promise.all(promises);
+                savedMessage.textContent = 'Контакты успешно сохранены!';
+                savedMessage.style.color = 'green';
+            } catch (error) {
+                savedMessage.textContent = `Ошибка: ${error}`;
+                savedMessage.style.color = 'red';
+            } finally {
+                setTimeout(() => { savedMessage.textContent = ''; }, 3000);
+            }
+        }
+
+        // --- 3. Привязка событий ---
+        document.getElementById('show-stock-toggle').addEventListener('change', handleToggleChange);
+        document.getElementById('ignore-stock-toggle').addEventListener('change', handleToggleChange); // <-- ИСПРАВЛЕН ID
+        document.getElementById('save-contacts-btn').addEventListener('click', saveAllContactSettings);
+
+        // --- 4. Первый запуск ---
+        loadAndApplySettings();
     }
 
 

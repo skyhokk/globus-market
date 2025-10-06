@@ -52,38 +52,43 @@
             <div class="settings-panel">
                 <h3>Глобальные настройки</h3>
                 <div class="setting-item">
-                    <label for="show-stock-toggle">Отображать остатки на сайте для пользователей <small class="status-text">(скоро...)</small></label>
+                    <label for="show-stock-toggle">Отображать остатки на сайте для пользователей <span id="show-stock-status-text" class="status-text"></span></label>
                     <label class="switch">
                         <input type="checkbox" id="show-stock-toggle">
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="setting-item">
-                    <label for="allow-negative-stock-toggle">Разрешить продажу при нулевом/отрицательном остатке <small class="status-text">(скоро...)</small></label>
+                    <label for="ignore-stock-toggle">Разрешить продажу при нулевом/отрицательном остатке <span id="ignore-stock-status-text" class="status-text"></span></label>
                     <label class="switch">
-                        <input type="checkbox" id="allow-negative-stock-toggle">
+                        <input type="checkbox" id="ignore-stock-toggle">
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="collapsible-section">
-                    <details>
+                    <details open>
                         <summary>
                             <a href="#" class="toggle-link">Контакты (главная страница)</a>
                         </summary>
-                        <div class="form-section" style="margin-top: 15px;">
-                             <div class="form-row icon-input">
-                                <label for="contact-whatsapp"><span>📞</span> WhatsApp</label>
-                                <input type="text" id="contact-whatsapp" placeholder="+7 777 123 4567">
+                        <div id="contact-fields-container" class="form-section" style="margin-top: 15px;">
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-whatsapp-display"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="Phone">Отображаемый номер WhatsApp</label>
+                                <input type="text" id="contact-whatsapp-display" data-key="contact_whatsapp_display" placeholder="Например, +7 700 ...">
                             </div>
-                            <div class="form-row icon-input">
-                                <label for="contact-instagram"><span>📸</span> Instagram</label>
-                                <input type="text" id="contact-instagram" placeholder="https://instagram.com/username">
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-whatsapp"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="admin-contact-icon" alt="WhatsApp">Ссылка для связи WhatsApp</label>
+                                <input type="text" id="contact-whatsapp" data-key="contact_whatsapp" placeholder="https://wa.me/7700...">
                             </div>
-                            <div class="form-row icon-input">
-                                <label for="contact-telegram"><span>✈️</span> Telegram</label>
-                                <input type="text" id="contact-telegram" placeholder="https://t.me/username">
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-instagram"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="admin-contact-icon" alt="Instagram">Ссылка на Instagram</label>
+                                <input type="text" id="contact-instagram" data-key="contact_instagram" placeholder="https://instagram.com/...">
                             </div>
-                            <button id="save-contacts-btn" style="width: auto; margin-top: 10px;">Сохранить контакты</button>
+                            <div class="setting-item-input icon-input">
+                                <label for="contact-telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="admin-contact-icon" alt="Telegram">Ссылка на Telegram</label>
+                                <input type="text" id="contact-telegram" data-key="contact_telegram" placeholder="https://t.me/...">
+                            </div>
+                            <button id="save-contacts-btn" class="save-button" style="width: auto; margin-top: 10px;">Сохранить контакты</button>
+                            <p id="settings-saved-message" style="color: green; text-align: center; margin-top: 10px;"></p>
                         </div>
                     </details>
                 </div>
