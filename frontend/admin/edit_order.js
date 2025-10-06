@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "https://globus-market-backend.onrender.com";
 let currentOrderData = null; // Будем хранить исходные данные заказа
 
 document.addEventListener('DOMContentLoaded', () => {

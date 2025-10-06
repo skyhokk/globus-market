@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- КОНСТАНТЫ И ПЕРЕМЕННЫЕ ---
-    const API_BASE_URL = "http://127.0.0.1:8000";
+    const API_BASE_URL = "https://globus-market-backend.onrender.com";
     const token = localStorage.getItem('accessToken');
     let categoriesData = []; // Сохраняем загруженные категории здесь
 
