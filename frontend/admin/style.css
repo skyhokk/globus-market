@@ -496,54 +496,56 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
 
 
 @media print {
-    /* --- СТАРЫЕ ПРАВИЛА (остаются без изменений) --- */
+    /* Скрываем всё лишнее с экрана */
     body > .admin-container > header,
     body > .admin-container > footer,
     .action-buttons, .form-footer, .delete-item-link, .customer-details .form-row,
     script, .settings-panel, .header-actions, .action-btn-group, .burger-btn, .burger-menu,
-    .revision-footer, #print-btn, .back-link-btn {
+    .revision-footer, #print-btn, .back-link-btn, .date-nav {
         display: none !important;
     }
-    .admin-container {
-        box-shadow: none !important; margin: 0 !important; padding: 0 !important;
-        width: 100% !important; max-width: none !important;
+
+    /* Убираем тени, отступы и лишнюю ширину у контейнеров */
+    body, .admin-container, main {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        display: block !important;
     }
-    body:has(#printable-invoice-container) .admin-container > main {
-        display: none !important;
-    }
+
+    /* Стили для печати накладных (остаются без изменений) */
+    body:has(#printable-invoice-container) .admin-container > main { display: none !important; }
     #printable-invoice-container { display: block !important; }
     .invoice-print-box { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9pt; }
-    .invoice-print-box h2 { font-size: 14pt; margin-bottom: 15px; }
-    .invoice-print-box p { margin: 4px 0; font-size: 10pt; }
-    .invoice-print-box table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
-    .invoice-print-box th, .invoice-print-box td { border: 1px solid #888; padding: 5px; text-align: left; vertical-align: middle; }
-    .invoice-print-box th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: bold; }
-    .invoice-print-box td img { max-width: 100%; height: auto; max-height: 40px; display: block; margin: auto; object-fit: contain; }
-    .text-right { text-align: right; }
-    .invoice-print-box .totals-section { margin-top: 15px; float: right; width: 45%; }
-    .invoice-print-box .totals-section p { display: flex; justify-content: space-between; margin: 5px 0; font-size: 10pt; }
-    .invoice-print-box .totals-section .final-total { font-weight: bold; font-size: 11pt; border-top: 1px solid #000; padding-top: 5px; }
+    .invoice-print-box h2 { font-size: 14pt; }
+    .invoice-print-box table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .invoice-print-box th, .invoice-print-box td { border: 1px solid #888; padding: 5px; }
+    .invoice-print-box th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-    /* --- НОВЫЕ ПРАВИЛА СПЕЦИАЛЬНО ДЛЯ СТРАНИЦЫ РЕВИЗИИ --- */
+    /* --- ИСПРАВЛЕННЫЕ СТИЛИ ДЛЯ СТРАНИЦЫ РЕВИЗИИ --- */
     #revision-table {
-        font-size: 9pt; /* Уменьшаем шрифт, чтобы всё влезло */
-        width: 100%;
-        table-layout: auto; /* Позволяем браузеру самому подбирать ширину колонок */
+        font-size: 8pt !important; /* Уменьшаем шрифт еще сильнее */
+        width: 100% !important;
+        table-layout: auto;
+        border-collapse: collapse !important;
+        margin-top: 20px; /* Небольшой отступ сверху */
     }
 
     #revision-table th, 
     #revision-table td {
-        padding: 4px 6px; /* Уменьшаем отступы в ячейках */
-        word-wrap: break-word; /* Разрешаем перенос длинных слов в названии товара */
+        padding: 5px !important; /* Уменьшаем отступы */
+        word-wrap: break-word; /* Разрешаем перенос текста */
+        border: 1px solid #ccc !important; /* Добавляем рамки для читаемости */
     }
     
     #revision-table .actual-stock-input {
-        width: 60px; /* Делаем поле для ввода поуже */
-        padding: 2px;
-        font-size: 9pt;
+        width: 50px !important; /* Уменьшаем поле для ввода */
+        font-size: 8pt !important;
+        padding: 2px !important;
         border: 1px solid #ccc !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
     }
 }
 
