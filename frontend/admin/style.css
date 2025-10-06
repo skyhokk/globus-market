@@ -518,12 +518,7 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
         background-color: white !important;
     }
 
-    /* Скрываем элементы, помеченные классом print-hide */
-    .print-hide {
-        display: none !important;
-    }
-
-    /* --- СТИЛИ ДЛЯ ПЕЧАТИ НАКЛАДНЫХ (ИСПРАВЛЕНО) --- */
+    /* --- СТИЛИ ДЛЯ ПЕЧАТИ НАКЛАДНЫХ (оставляем исправления) --- */
     body:has(#printable-invoice-container) .admin-container > main { display: none !important; }
     #printable-invoice-container { display: block !important; }
     .invoice-print-box { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10pt; }
@@ -533,7 +528,6 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
     .invoice-print-box th, .invoice-print-box td { border: 1px solid #888; padding: 6px; text-align: left; vertical-align: middle; }
     .invoice-print-box th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: bold; }
     
-    /* Исправление для огромных картинок */
     .invoice-print-box td img {
         max-width: 60px !important;
         max-height: 60px !important;
@@ -545,7 +539,6 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
     }
     .text-right { text-align: right; }
     
-    /* Исправление для выравнивания сумм */
     .invoice-print-box .totals-section {
         margin-top: 20px;
         float: right;
@@ -564,28 +557,12 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
         padding-top: 6px;
     }
 
-    /* --- СТИЛИ ДЛЯ ПЕЧАТИ РЕВИЗИИ (ИСПРАВЛЕНО) --- */
-    h2 { font-size: 16pt; text-align: center; } /* Делаем заголовок "Ревизия остатков" видимым */
-    #revision-table {
-        font-size: 10pt !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-top: 20px;
-    }
-    #revision-table th, 
-    #revision-table td {
-        padding: 8px !important;
-        border: 1px solid #888 !important;
-    }
-    #revision-table th {
-        background-color: #f2f2f2 !important;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact;
-    }
+    /* --- СТИЛИ ДЛЯ РЕВИЗИИ (простое правило для поля ввода) --- */
+    h2 { font-size: 16pt; text-align: center; }
     #revision-table .actual-stock-input {
         border: none !important;
         border-bottom: 1px solid #333 !important;
         width: 100% !important;
-        font-size: 10pt !important;
         text-align: center;
         background: #f8f9fa !important;
         -webkit-print-color-adjust: exact; print-color-adjust: exact;
