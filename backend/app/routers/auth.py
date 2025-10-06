@@ -17,7 +17,6 @@ import os
 
 from app import models, schemas
 from app.dependencies import get_db
-
 from app.security import verify_password
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
