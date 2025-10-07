@@ -4,6 +4,7 @@ const API_BASE_URL = "https://globus-market-backend.onrender.com";
 const PLACEHOLDER_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
 let cart = []; // Глобальная переменная для корзины
+let products = []; // Глобальная переменная для всех загруженных товаров
 
 // --- Ссылки на DOM-элементы ---
 const cartModal = document.getElementById('cart-modal');
@@ -187,7 +188,7 @@ async function loadProducts(searchQuery = null, subcategoryId = null, categoryId
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error('Ошибка сети');
-        const products = await response.json();
+        products = await response.json();
         grid.innerHTML = '';
         if (products.length === 0) {
             grid.innerHTML = '<p>Товары не найдены.</p>';
@@ -492,6 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutForm.reset();
             updateCartUI();
             cartModal.classList.add('hidden');
+
+            renderProducts(products); // Перерисовываем товары на главной странице
 
         } catch (error) {
             console.error(error);
