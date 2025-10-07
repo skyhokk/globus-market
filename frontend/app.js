@@ -471,6 +471,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerPhone = document.getElementById('customer-phone').value;
         const customerComment = document.getElementById('customer-comment').value;
 
+        // Блокируем кнопку, чтобы избежать двойных нажатий
+        const submitButton = checkoutForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Отправка...';
+
         const orderData = {
             customer_name: customerName,
             customer_phone: customerPhone,
@@ -484,21 +489,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(orderData)
             });
-            if (!response.ok) throw new Error('Ошибка при создании заказа');
+
+            if (!response.ok) {
+                // Если сервер вернул ошибку, пытаемся её прочитать и показать
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Ошибка при создании заказа. Попробуйте снова.');
+            }
             
             const result = await response.json();
             alert(`Заказ №${result.order_number} успешно создан!`);
             
-            cart = [];
-            checkoutForm.reset();
-            updateCartUI();
-            cartModal.classList.add('hidden');
-
-            renderProducts(products); // Перерисовываем товары на главной странице
+            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ---
+            // Вместо сложной логики очистки, просто перезагружаем страницу.
+            // Это гарантированно сбросит корзину и обновит всё без ошибок.
+            window.location.reload();
 
         } catch (error) {
             console.error(error);
-            alert('Не удалось создать заказ.');
+            alert(error.message); // Показываем более детальную ошибку
+
+            // Разблокируем кнопку в случае ошибки
+            submitButton.disabled = false;
+            submitButton.textContent = 'Оформить заказ';
         }
     });
 });
