@@ -256,6 +256,12 @@ document.addEventListener('DOMContentLoaded', () => {
         orders.forEach((order, index) => {
             const finalSum = calculateFinalSum(order);
             const tr = document.createElement('tr');
+            
+            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+            tr.dataset.orderId = order.id; // Добавляем ID для клика
+            tr.dataset.orderNumber = order.order_number; // Добавляем номер заказа для навигации
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
             tr.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${order.order_number}</td>

@@ -176,6 +176,22 @@ function renderEditForm(order, token) {
     const isEditable = ['new', 'processed'].includes(order.status);
     const isCompleted = order.status === 'completed';
     const isReturned = ['returned', 'partially_returned'].includes(order.status);
+    const isDeleted = order.status === 'deleted';
+
+    // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+    // Если заказ удалён, сразу переводим страницу в режим "только просмотр"
+    if (isDeleted) {
+        // Меняем заголовок
+        document.getElementById('order-title').textContent = `Просмотр удалённого заказа №${order.order_number}`;
+        
+        // Прячем все лишние кнопки
+        const actionButtons = document.querySelector('.action-buttons');
+        if(actionButtons) {
+            // Оставляем только кнопку "Печать"
+            actionButtons.innerHTML = '<button type="button" id="print-btn" class="action-btn">Печать</button>';
+        }
+    }
+    // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
     // --- НАЧАЛО ИЗМЕНЕНИЙ: Условное добавление блока с примечанием ---
     let commentHTML = '';
