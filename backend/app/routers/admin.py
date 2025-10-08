@@ -60,22 +60,36 @@ class OrderUpdate(BaseModel):
 
 @router.get("/orders", response_model=List[schemas.Order])
 def get_all_orders(
-    date_str: Optional[str] = None, # <-- ДОБАВЛЕН ПАРАМЕТР ДЛЯ ДАТЫ
+    date_str: Optional[str] = None,
+    status: Optional[str] = None, # <-- Добавили новый фильтр по статусу
     db: Session = Depends(get_db),
     admin: models.User = Depends(get_current_admin_user)
 ):
     """
-    Получает список всех заказов.
-    Если передана дата в формате 'YYYY-MM-DD', фильтрует заказы по этому дню.
+    Получает список заказов.
+    - Если передан 'status', фильтрует по нему.
+    - Иначе, отдает все НЕ удалённые заказы.
+    - Фильтрует по дате, если она передана.
     """
-    query = db.query(models.Order).filter(models.Order.status != "deleted")
+    query = db.query(models.Order)
+
+    if status:
+        # Если явно запрошен статус (например, 'deleted'), фильтруем по нему
+        query = query.filter(models.Order.status == status)
+    else:
+        # По умолчанию, как и раньше, не показываем удалённые
+        query = query.filter(models.Order.status != "deleted")
     
-    # --- НОВЫЙ БЛОК: Фильтрация по дате ---
     if date_str:
         try:
             filter_date = date.fromisoformat(date_str)
-            query = query.filter(func.date(models.Order.created_at) == filter_date)
-        except ValueError:
+            # В зависимости от статуса, фильтруем по разным датам
+            if status == 'deleted':
+                query = query.filter(func.date(models.Order.deleted_at) == filter_date)
+            else:
+                 query = query.filter(func.date(models.Order.created_at) == filter_date)
+
+        except (ValueError, TypeError):
             raise HTTPException(status_code=400, detail="Неверный формат даты. Используйте YYYY-MM-DD.")
     
     orders = query.order_by(models.Order.id.asc()).all()

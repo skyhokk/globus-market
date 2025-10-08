@@ -95,34 +95,49 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDate = date;
         updateDateDisplay();
         
-        const tbodyIds = ['new-orders-tbody', 'processed-orders-tbody', 'completed-orders-tbody', 'returned-orders-tbody'];
+        const tbodyIds = ['new-orders-tbody', 'processed-orders-tbody', 'completed-orders-tbody', 'returned-orders-tbody', 'deleted-orders-tbody'];
         tbodyIds.forEach(id => {
             const tbody = document.getElementById(id);
             if(tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Загрузка...</td></tr>`;
         });
 
         const dateString = formatDateForAPI(date);
-        const url = new URL(`${API_BASE_URL}/admin/orders`);
-        url.searchParams.append('date_str', dateString);
-
+        
         try {
-            const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (response.status === 401 || response.status === 403) { handleLogout(); return; }
-            if (!response.ok) throw new Error('Не удалось загрузить заказы');
+            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+            // 1. Создаем два запроса: один для активных, второй для удалённых
+            const activeOrdersPromise = fetch(`${API_BASE_URL}/admin/orders?date_str=${dateString}`, { 
+                headers: { 'Authorization': `Bearer ${token}` } 
+            });
+            const deletedOrdersPromise = fetch(`${API_BASE_URL}/admin/orders?status=deleted&date_str=${dateString}`, { 
+                headers: { 'Authorization': `Bearer ${token}` } 
+            });
+
+            // 2. Выполняем их параллельно и ждем оба ответа
+            const [activeResponse, deletedResponse] = await Promise.all([activeOrdersPromise, deletedOrdersPromise]);
+
+            if (activeResponse.status === 401 || activeResponse.status === 403) { handleLogout(); return; }
+            if (!activeResponse.ok || !deletedResponse.ok) throw new Error('Не удалось загрузить часть заказов');
             
-            const orders = await response.json();
-            renderOrderTables(orders);
-            initializeStatusFilters(orders);
+            const activeOrders = await activeResponse.json();
+            const deletedOrders = await deletedResponse.json();
+
+            // 3. Объединяем результаты в один массив
+            const allOrders = [...activeOrders, ...deletedOrders];
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+            
+            renderOrderTables(allOrders);
+            initializeStatusFilters(allOrders);
 
         } catch (error) {
-            console.error("Ошибка при загрузке заказов:", error); // Оставляем ошибку в консоли для отладки
+            console.error("Ошибка при загрузке заказов:", error);
             tbodyIds.forEach(id => {
                 const tbody = document.getElementById(id);
-                // Вместо ошибки выводим сообщение "Нет заказов"
-                if(tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Нет заказов</td></tr>`;
+                if(tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Ошибка загрузки заказов.</td></tr>`;
             });
         }
     }
+
 
     function renderOrderTables(orders) {
         const tbodies = {
