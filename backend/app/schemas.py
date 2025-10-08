@@ -101,6 +101,10 @@ class Order(BaseModel):
     completed_at: Optional[datetime] = None
     returned_at: Optional[datetime] = None
     # ----------------------------    
+    
+    deleted_at: Optional[datetime] = None
+    deletion_reason: Optional[str] = None
+    
     return_processed_without_discount: bool = False
     
     total_returned_amount: Optional[float] = None    

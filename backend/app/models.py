@@ -60,6 +60,10 @@ class Order(Base):
     processed_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     returned_at = Column(DateTime(timezone=True), nullable=True)
+    
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    deletion_reason = Column(String, nullable=True)
+    
     # ------------------------------------    
     return_processed_without_discount = Column(Boolean, default=False)
     

@@ -130,13 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
             processed: document.getElementById('processed-orders-tbody'),
             completed: document.getElementById('completed-orders-tbody'),
             returned: document.getElementById('returned-orders-tbody'),
+            deleted: document.getElementById('deleted-orders-tbody')
         };
         
         if (window.innerWidth > 768) {
             Object.values(tbodies).forEach(tbody => { if(tbody) tbody.innerHTML = ''; });
         }
 
-        const ordersByStatus = { new: [], processed: [], completed: [], returned: [], partially_returned: [] };
+        const ordersByStatus = { new: [], processed: [], completed: [], returned: [], partially_returned: [], deleted: [] };
         orders.forEach(order => {
             if (ordersByStatus[order.status] !== undefined) {
                 ordersByStatus[order.status].push(order);
@@ -148,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTableSection(tbodies.completed, ordersByStatus.completed, 'completed');
         const allReturns = [...ordersByStatus.returned, ...ordersByStatus.partially_returned];
         renderTableSection(tbodies.returned, allReturns, 'returned');
+        renderDeletedTableSection(tbodies.deleted, ordersByStatus.deleted);
     }
 
     function renderTableSection(tbody, orders, status) {
@@ -226,6 +228,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // +++ ДОБАВЬТЕ ЭТУ НОВУЮ ФУНКЦИЮ +++
+    function renderDeletedTableSection(tbody, orders) {
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Нет заказов в этом статусе.</td></tr>`;
+            return;
+        }
+
+        orders.forEach((order, index) => {
+            const finalSum = calculateFinalSum(order);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${order.order_number}</td>
+                <td>${order.customer_name}<br><small>${order.customer_phone}</small></td>
+                <td>${finalSum.toFixed(2)} ₸</td>
+                <td>${formatDateTime(order.deleted_at)}</td>
+                <td>${order.deletion_reason || 'Не указана'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+
     function generateActionButtons(order) {
         const editUrl = `edit_order.html?id=${order.id}`;
         const pdfUrl = `${API_BASE_URL}${order.invoice_path_pdf}`;
@@ -237,10 +265,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let buttons = '';
         switch(order.status) {
             case 'new':
-                buttons = `<button class="process-btn" data-order-id="${order.id}">Обработать</button>`;
+                buttons = `<button class="process-btn" data-order-id="${order.id}">Обработать</button> <button class="delete-btn">Удалить</button>`;
                 break;
             case 'processed':
-                buttons = `<button class="complete-btn" data-order-id="${order.id}">Выполнено</button> <a href="${editUrl}" class="edit-btn">Редакт.</a>`;
+                buttons = `<button class="complete-btn" data-order-id="${order.id}">Выполнено</button> <a href="${editUrl}" class="edit-btn">Редакт.</a> <button class="delete-btn">Удалить</button>`;
                 break;
             case 'completed':
                  buttons = `<a href="${editUrl}" class="return-btn-table">Возврат</a>`;
@@ -356,6 +384,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) { alert(`Ошибка: ${error.message}`); }
             }
             return;
+        }
+
+        if (target.matches('.delete-btn')) {
+            event.preventDefault(); // Предотвращаем любые стандартные действия
+            const reason = prompt("Пожалуйста, укажите причину удаления заказа (например, 'клиент отказался', 'тестовый заказ'):");
+
+            if (reason && reason.trim() !== "") {
+                if (confirm(`Вы уверены, что хотите удалить заказ №${order.order_number}?\nПричина: ${reason}`)) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ reason: reason })
+                        });
+                        if (!response.ok) { 
+                            const err = await response.json(); 
+                            throw new Error(err.detail || 'Не удалось удалить заказ'); 
+                        }
+                        alert('Заказ успешно удален (перемещен в архив).');
+                        loadOrders(token, currentDate); // Обновляем список
+                    } catch (error) {
+                        alert(`Ошибка: ${error.message}`);
+                    }
+                }
+            } else if (reason !== null) { // Если пользователь нажал "ОК", но оставил поле пустым
+                alert("Причина удаления не может быть пустой.");
+            }
+            return; // Завершаем выполнение, чтобы не сработали другие обработчики
         }
 
         if (!isMobile) {

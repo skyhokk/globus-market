@@ -68,7 +68,7 @@ def get_all_orders(
     Получает список всех заказов.
     Если передана дата в формате 'YYYY-MM-DD', фильтрует заказы по этому дню.
     """
-    query = db.query(models.Order)
+    query = db.query(models.Order).filter(models.Order.status != "deleted")
     
     # --- НОВЫЙ БЛОК: Фильтрация по дате ---
     if date_str:
@@ -447,3 +447,37 @@ def bulk_update_products(
     db.commit()
     
     return {"message": f"Успешно обновлено {updated_count} товаров."}
+
+
+
+# Для удаления заказов
+class OrderDeleteRequest(BaseModel):
+    reason: str
+
+# --- НОВЫЙ ЭНДПОИНТ для "мягкого" удаления заказа ---
+@router.delete("/orders/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_order(
+    order_id: int,
+    delete_data: OrderDeleteRequest,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin_user)
+):
+    """
+    "Мягко" удаляет заказ, меняя его статус на 'deleted'.
+    Доступно только для статусов 'new' и 'processed'.
+    """
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not db_order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Заказ не найден")
+
+    if db_order.status not in ["new", "processed"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Нельзя удалить заказ со статусом '{db_order.status}'"
+        )
+
+    db_order.status = "deleted"
+    db_order.deleted_at = func.now() # Устанавливаем текущее время
+    db_order.deletion_reason = delete_data.reason # Сохраняем причину
+    db.commit()
+    return
