@@ -495,10 +495,7 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
 .order-btn.pdf, .order-btn.excel { background-color: #e9ecef; color: #333; border: 1px solid #ccc; }
 
 /* Стили для заголовка в шапке */
-.header-title-container {
-    flex-grow: 1;
-    text-align: center;
-}
+
 .mobile-title {
     display: none; /* По умолчанию мобильный заголовок скрыт */
     align-items: center;
@@ -692,11 +689,9 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
     .admin-header .mobile-title {
         display: flex;
     }
-    /* Центрируем заголовок, так как кнопка "назад" больше не нужна на главной */
-    .admin-header h2, .header-title-container {
-        width: 100%;
-        padding: 0 50px; /* Оставляем место для кнопок по краям */
-        box-sizing: border-box;
+    /* Центрируем контейнер заголовка только на мобильных */
+    .header-title-container {
+        flex-grow: 1;
         text-align: center;
     }
 
