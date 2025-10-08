@@ -664,12 +664,19 @@ document.addEventListener('DOMContentLoaded', () => {
     async function openOrderEditor(orderId) {
         const token = localStorage.getItem('accessToken');
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!response.ok) throw new Error('Не удалось загрузить данные заказа');
+            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+            // Запрашиваем один конкретный заказ по его ID, используя правильный эндпоинт,
+            // который умеет находить заказы с любым статусом.
+            const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}`, { 
+                headers: { 'Authorization': `Bearer ${token}` } 
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.detail || 'Не удалось загрузить данные заказа');
+            }
             
-            const orders = await response.json();
-            const order = orders.find(o => o.id == orderId);
-            if (!order) throw new Error('Заказ с таким ID не найден');
+            const order = await response.json();
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
             
             mobileCurrentOrderData = order;
             renderMobileEditor(order);
