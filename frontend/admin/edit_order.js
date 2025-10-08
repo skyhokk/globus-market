@@ -45,7 +45,7 @@ async function loadOrderDetails(orderId, token) {
         // Вызываем основную функцию отрисовки
         renderEditForm(order, token);
         // Эта функция больше не нужна здесь, так как renderEditForm теперь делает всё
-        // updateTotals(); 
+        updateTotals(); 
 
     } catch (error) {
         console.error("Ошибка:", error);
