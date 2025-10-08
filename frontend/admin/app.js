@@ -263,20 +263,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const excelLink = `<a href="${excelUrl}" class="action-link excel" download>Excel</a>`;
         
         let buttons = '';
+        // Добавляем data-order-id и data-order-number ко всем кнопкам для доступа в обработчике
+        const orderDataAttrs = `data-order-id="${order.id}" data-order-number="${order.order_number}"`;
+
         switch(order.status) {
             case 'new':
-                buttons = `<button class="process-btn" data-order-id="${order.id}">Обработать</button> <button class="delete-btn">Удалить</button>`;
+                buttons = `<button class="process-btn" ${orderDataAttrs}>Обработать</button> <button class="delete-btn" ${orderDataAttrs}>Удалить</button>`;
                 break;
             case 'processed':
-                buttons = `<button class="complete-btn" data-order-id="${order.id}">Выполнено</button> <a href="${editUrl}" class="edit-btn">Редакт.</a> <button class="delete-btn">Удалить</button>`;
+                buttons = `<button class="complete-btn" ${orderDataAttrs}>Выполнено</button> <a href="${editUrl}" class="edit-btn">Редакт.</a> <button class="delete-btn" ${orderDataAttrs}>Удалить</button>`;
                 break;
             case 'completed':
-                 buttons = `<a href="${editUrl}" class="return-btn-table">Возврат</a>`;
+                buttons = `<a href="${editUrl}" class="return-btn-table">Возврат</a>`;
                 break;
             case 'returned':
             case 'partially_returned':
-                 buttons = `<a href="${editUrl}" class="edit-btn">Подробнее</a>`;
-                 break;
+                buttons = `<a href="${editUrl}" class="edit-btn">Подробнее</a>`;
+                break;
         }
         return `${buttons} ${pdfLink} ${excelLink}`;
     }
@@ -289,19 +292,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const excelBtn = `<a href="${excelUrl}" class="order-btn excel" download>Excel</a>`;
         
         let actionButtons = '';
+        // Добавляем data-атрибуты для кнопок
+        const orderDataAttrs = `data-order-id="${order.id}" data-order-number="${order.order_number}"`;
+
         switch(order.status) {
             case 'new':
-                actionButtons = `<button class="order-btn process open-editor-btn">Обработать заказ</button>`;
+                // Добавляем кнопку "Удалить"
+                actionButtons = `<button class="order-btn process open-editor-btn" ${orderDataAttrs}>Обработать</button> <button class="order-btn return delete-btn" ${orderDataAttrs}>Удалить</button>`;
                 break;
             case 'processed':
-                actionButtons = `<button class="order-btn complete">Выполнено</button> <button class="order-btn edit open-editor-btn">Редакт.</button>`;
+                // Добавляем кнопку "Удалить"
+                actionButtons = `<button class="order-btn complete" ${orderDataAttrs}>Выполнено</button> <button class="order-btn edit open-editor-btn" ${orderDataAttrs}>Редакт.</button> <button class="order-btn return delete-btn" ${orderDataAttrs}>Удалить</button>`;
                 break;
             case 'completed':
-                actionButtons = `<button class="order-btn return open-editor-btn">Возврат</button>`;
+                actionButtons = `<button class="order-btn return open-editor-btn" ${orderDataAttrs}>Возврат</button>`;
                 break;
             case 'returned':
             case 'partially_returned':
-                actionButtons = `<button class="order-btn details open-editor-btn">Подробнее</button>`;
+                actionButtons = `<button class="order-btn details open-editor-btn" ${orderDataAttrs}>Подробнее</button>`;
                 break;
         }
         return `${actionButtons} ${pdfBtn} ${excelBtn}`;
@@ -364,14 +372,48 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', async (event) => {
         const token = localStorage.getItem('accessToken');
         const target = event.target;
-        const orderElement = target.closest('[data-order-id]');
-        if (!orderElement) return;
-        const orderId = orderElement.dataset.orderId;
 
+        // Ищем ближайший элемент с данными заказа (карточка или строка таблицы)
+        const orderElement = target.closest('[data-order-id]');
+        if (!orderElement) return; // Если клик был не по заказу, выходим
+
+        // Получаем данные заказа из атрибутов
+        const orderId = orderElement.dataset.orderId;
+        const orderNumber = orderElement.dataset.orderNumber;
         const isMobile = window.innerWidth <= 768;
 
+        // --- ОБРАБОТЧИК КНОПКИ "УДАЛИТЬ" ---
+        if (target.matches('.delete-btn')) {
+            event.preventDefault();
+            const reason = prompt(`Пожалуйста, укажите причину удаления заказа №${orderNumber}:`);
+
+            if (reason && reason.trim() !== "") {
+                if (confirm(`Вы уверены, что хотите удалить заказ №${orderNumber}?\nПричина: ${reason}\n\nЭто действие нельзя отменить.`)) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ reason: reason.trim() })
+                        });
+                        if (!response.ok) { 
+                            const err = await response.json(); 
+                            throw new Error(err.detail || 'Не удалось удалить заказ'); 
+                        }
+                        alert('Заказ успешно перемещен в "Удалённые".');
+                        loadOrders(token, currentDate); // Обновляем список заказов
+                    } catch (error) {
+                        alert(`Ошибка: ${error.message}`);
+                    }
+                }
+            } else if (reason !== null) { // Если пользователь нажал "ОК", но оставил поле пустым
+                alert("Причина удаления не может быть пустой.");
+            }
+            return; // Завершаем, чтобы не сработали другие клики
+        }
+
+        // --- ОБРАБОТЧИК КНОПКИ "ВЫПОЛНЕНО" ---
         if (target.matches('.complete-btn') || target.matches('.complete')) {
-            if (confirm(`Вы уверены, что хотите завершить заказ? Это действие спишет товары со склада.`)) {
+            if (confirm(`Вы уверены, что хотите завершить заказ №${orderNumber}? Это действие спишет товары со склада.`)) {
                 try {
                     const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}/status`, {
                         method: 'PATCH',
@@ -386,42 +428,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (target.matches('.delete-btn')) {
-            event.preventDefault(); // Предотвращаем любые стандартные действия
-            const reason = prompt("Пожалуйста, укажите причину удаления заказа (например, 'клиент отказался', 'тестовый заказ'):");
-
-            if (reason && reason.trim() !== "") {
-                if (confirm(`Вы уверены, что хотите удалить заказ №${order.order_number}?\nПричина: ${reason}`)) {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ reason: reason })
-                        });
-                        if (!response.ok) { 
-                            const err = await response.json(); 
-                            throw new Error(err.detail || 'Не удалось удалить заказ'); 
-                        }
-                        alert('Заказ успешно удален (перемещен в архив).');
-                        loadOrders(token, currentDate); // Обновляем список
-                    } catch (error) {
-                        alert(`Ошибка: ${error.message}`);
-                    }
-                }
-            } else if (reason !== null) { // Если пользователь нажал "ОК", но оставил поле пустым
-                alert("Причина удаления не может быть пустой.");
-            }
-            return; // Завершаем выполнение, чтобы не сработали другие обработчики
-        }
-
-        if (!isMobile) {
+        // --- ОБРАБОТЧИКИ НАВИГАЦИИ (переход в редактор) ---
+        if (!isMobile) { // Для десктопа
             if (target.matches('.process-btn') || target.matches('.return-btn-table') || target.matches('.edit-btn') || (target.closest('tr') && !target.closest('a, button'))) {
                 window.location.href = `edit_order.html?id=${orderId}`;
             }
         } 
-        else {
+        else { // Для мобильной версии
             if (target.matches('.open-editor-btn') || (target.closest('.order-card-mobile') && !target.closest('a, button'))) {
-                 openOrderEditor(orderId);
+                openOrderEditor(orderId);
             }
         }
     });
@@ -447,6 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // --- Вспомогательная функция для обновления текста у переключателей ---
         function updateToggleText(toggleElement) {
+            if (!toggleElement) return; // Добавлена проверка на существование элемента
             const isChecked = toggleElement.checked;
             let statusTextElement, onText, offText;
             if (toggleElement.id === 'show-stock-toggle') {
@@ -475,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const settingsMap = new Map(settings.map(s => [s.key, s.value]));
                 
                 // Применяем значения к полям контактов
-                document.querySelectorAll('input[data-key]').forEach(input => {
+                document.querySelectorAll('#contact-fields-container input[data-key]').forEach(input => {
                     const key = input.dataset.key;
                     if (settingsMap.has(key)) {
                         input.value = settingsMap.get(key);
@@ -484,16 +500,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Применяем значения к переключателям
                 const showStockToggle = document.getElementById('show-stock-toggle');
-                showStockToggle.checked = settingsMap.get('show_stock_publicly') === 'true';
-                updateToggleText(showStockToggle);
+                if (showStockToggle) {
+                    showStockToggle.checked = settingsMap.get('show_stock_publicly') === 'true';
+                    updateToggleText(showStockToggle);
+                }
 
                 const ignoreStockToggle = document.getElementById('ignore-stock-toggle');
-                ignoreStockToggle.checked = settingsMap.get('ignore_stock_limits') === 'true';
-                updateToggleText(ignoreStockToggle);
+                if (ignoreStockToggle) {
+                    ignoreStockToggle.checked = settingsMap.get('ignore_stock_limits') === 'true';
+                    updateToggleText(ignoreStockToggle);
+                }
 
             } catch (error) {
                 console.error(error.message);
-                alert(`Ошибка загрузки настроек: ${error.message}`);
+                // alert(`Ошибка загрузки настроек: ${error.message}`);
             }
         }
 
@@ -530,7 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
         async function saveAllContactSettings() {
             const inputs = document.querySelectorAll('#contact-fields-container input[data-key]');
             const savedMessage = document.getElementById('settings-saved-message');
+            if (!savedMessage) return;
+
             savedMessage.textContent = 'Сохранение...';
+            savedMessage.style.color = 'black';
 
             const promises = Array.from(inputs).map(input => {
                 const key = input.dataset.key;
@@ -557,14 +580,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- 3. Привязка событий ---
-        document.getElementById('show-stock-toggle').addEventListener('change', handleToggleChange);
-        document.getElementById('ignore-stock-toggle').addEventListener('change', handleToggleChange); // <-- ИСПРАВЛЕН ID
-        document.getElementById('save-contacts-btn').addEventListener('click', saveAllContactSettings);
+        const showStockToggle = document.getElementById('show-stock-toggle');
+        const ignoreStockToggle = document.getElementById('ignore-stock-toggle'); // <-- ИСПРАВЛЕН ID
+        const saveContactsBtn = document.getElementById('save-contacts-btn');
+
+        if (showStockToggle) showStockToggle.addEventListener('change', handleToggleChange);
+        if (ignoreStockToggle) ignoreStockToggle.addEventListener('change', handleToggleChange);
+        if (saveContactsBtn) saveContactsBtn.addEventListener('click', saveAllContactSettings);
 
         // --- 4. Первый запуск ---
         loadAndApplySettings();
     }
-
 
     // =================================================================================================
     // ===== БЛОК: ЛОГИКА ЭКРАНА РЕДАКТИРОВАНИЯ ЗАКАЗА (МОБИЛЬНАЯ ВЕРСИЯ) =====
