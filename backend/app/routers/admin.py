@@ -56,6 +56,23 @@ class OrderUpdate(BaseModel):
     status: Optional[str] = None
 
 
+
+# --- НОВЫЙ ЭНДПОИНТ для получения ОДНОГО заказа по ID ---
+@router.get("/orders/{order_id}", response_model=schemas.Order)
+def get_order_by_id(
+    order_id: int,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin_user)
+):
+    """
+    Возвращает один заказ по его ID, независимо от статуса (включая удалённые).
+    """
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Заказ с таким ID не найден")
+    return db_order
+
+
 # --- Эндпоинты для администратора ---
 
 @router.get("/orders", response_model=List[schemas.Order])

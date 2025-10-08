@@ -24,21 +24,28 @@ async function loadOrderDetails(orderId, token) {
     container.innerHTML = '<p>Загрузка данных заказа...</p>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/admin/orders`, {
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+        // Теперь мы запрашиваем один конкретный заказ по его ID, используя новый эндпоинт
+        const response = await fetch(`${API_BASE_URL}/admin/orders/${orderId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!response.ok) throw new Error('Не удалось загрузить заказы');
-        
-        const orders = await response.json();
-        const order = orders.find(o => o.id == orderId);
 
-        if (!order) throw new Error('Заказ с таким ID не найден');
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || 'Не удалось загрузить заказ');
+        }
+
+        const order = await response.json();
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
         currentOrderData = order;
+        // Устанавливаем заголовок
         document.getElementById('order-title').textContent = `Редактирование заказа №${order.order_number}`;
-        
+
+        // Вызываем основную функцию отрисовки
         renderEditForm(order, token);
-        updateTotals(); 
+        // Эта функция больше не нужна здесь, так как renderEditForm теперь делает всё
+        // updateTotals(); 
 
     } catch (error) {
         console.error("Ошибка:", error);
