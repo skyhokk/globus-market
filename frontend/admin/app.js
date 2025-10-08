@@ -246,22 +246,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // +++ ДОБАВЬТЕ ЭТУ НОВУЮ ФУНКЦИЮ +++
     function renderDeletedTableSection(tbody, orders) {
         if (!tbody) return;
+        
+        // Находим соответствующий мобильный контейнер
+        const mobileContainerId = tbody.id.replace('-tbody', '-mobile');
+        const mobileContainer = document.getElementById(mobileContainerId);
+
         tbody.innerHTML = '';
+        if (mobileContainer) mobileContainer.innerHTML = '';
 
         if (orders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Нет заказов в этом статусе.</td></tr>`;
+            const message = `<tr><td colspan="6" style="text-align:center;">Нет заказов в этом статусе.</td></tr>`;
+            tbody.innerHTML = message;
+            if (mobileContainer) mobileContainer.innerHTML = `<div class="no-orders-message">Нет заказов в этом статусе</div>`;
             return;
         }
 
         orders.forEach((order, index) => {
             const finalSum = calculateFinalSum(order);
-            const tr = document.createElement('tr');
-            
-            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
-            tr.dataset.orderId = order.id; // Добавляем ID для клика
-            tr.dataset.orderNumber = order.order_number; // Добавляем номер заказа для навигации
-            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
+            // 1. Отрисовка для десктопа (остаётся без изменений)
+            const tr = document.createElement('tr');
+            tr.dataset.orderId = order.id;
+            tr.dataset.orderNumber = order.order_number;
             tr.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${order.order_number}</td>
@@ -271,6 +277,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${order.deletion_reason || 'Не указана'}</td>
             `;
             tbody.appendChild(tr);
+
+            // 2. Отрисовка для мобильной версии (НОВЫЙ БЛОК)
+            if (mobileContainer) {
+                const card = document.createElement('div');
+                card.className = 'order-card-mobile';
+                card.dataset.orderId = order.id;
+                card.dataset.orderNumber = order.order_number;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="order-number">#${order.order_number}</span>
+                        <span class="card-status-badge status-returned">Удалён</span>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-item"><span>Клиент:</span> <strong>${order.customer_name}</strong></div>
+                        <div class="detail-item"><span>Сумма:</span> <strong>${finalSum.toFixed(2)} ₸</strong></div>
+                        <div class="detail-item"><span>Дата удаления:</span> <strong>${formatDateTime(order.deleted_at)}</strong></div>
+                        <div class="detail-item"><span>Причина:</span> <strong>${order.deletion_reason || 'Не указана'}</strong></div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="order-btn details open-editor-btn">Подробнее</button>
+                    </div>
+                `;
+                mobileContainer.appendChild(card);
+            }
         });
     }
 
@@ -340,17 +370,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtersContainer = document.querySelector('.status-filters');
         if (!filtersContainer) return;
 
-        const counts = { new: 0, processed: 0, completed: 0, returned: 0, partially_returned: 0 };
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+        // 1. Добавляем 'deleted' в объект для подсчёта
+        const counts = { new: 0, processed: 0, completed: 0, returned: 0, partially_returned: 0, deleted: 0 };
         orders.forEach(order => { if (counts[order.status] !== undefined) { counts[order.status]++; } });
         
         const totalReturns = counts.returned + counts.partially_returned;
 
+        // 2. Добавляем HTML-код для новой кнопки "Удалённые"
         filtersContainer.innerHTML = `
             <button class="status-filter-btn active" data-filter="all"><span class="status-filter-label">Все</span><span class="status-filter-count">${orders.length}</span></button>
             <button class="status-filter-btn" data-filter="new"><span class="status-filter-label">Новые</span><span class="status-filter-count">${counts.new}</span></button>
             <button class="status-filter-btn" data-filter="processed"><span class="status-filter-label">Обработанные</span><span class="status-filter-count">${counts.processed}</span></button>
             <button class="status-filter-btn" data-filter="completed"><span class="status-filter-label">Завершённые</span><span class="status-filter-count">${counts.completed}</span></button>
             <button class="status-filter-btn" data-filter="returned"><span class="status-filter-label">Возвратные</span><span class="status-filter-count">${totalReturns}</span></button>
+            <button class="status-filter-btn" data-filter="deleted"><span class="status-filter-label">Удалённые</span><span class="status-filter-count">${counts.deleted}</span></button>
         `;
 
         filtersContainer.addEventListener('click', (event) => {
@@ -363,14 +397,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const filter = button.dataset.filter;
             const sections = document.querySelectorAll('.orders-section');
 
+            // 3. Обновляем логику фильтрации, чтобы она понимала 'deleted'
             sections.forEach(section => {
-                if (filter === 'all' || section.dataset.status === filter || (filter === 'returned' && (section.dataset.status === 'returned' || section.dataset.status === 'partially_returned'))) {
-                    section.style.display = 'block';
+                const status = section.dataset.status;
+                let show = false;
+                if (filter === 'all') {
+                    show = true;
+                } else if (filter === 'returned') {
+                    show = (status === 'returned' || status === 'partially_returned');
                 } else {
-                    section.style.display = 'none';
+                    show = (status === filter);
                 }
+                section.style.display = show ? 'block' : 'none';
             });
         });
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
     }
 
     // --- ПРИВЯЗКА ОБРАБОТЧИКОВ И ПЕРВЫЙ ЗАПУСК ---
