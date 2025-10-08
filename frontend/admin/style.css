@@ -750,7 +750,29 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
     
     #revision-table td, #products-table td { margin-bottom: 12px; }
     #revision-table .card-cell, #products-table .card-cell { padding: 0 !important; }
+
     
+    /* Делаем форму входа на весь экран на мобильных */
+    body.login-view {
+        /* Убираем центрирование по вертикали, чтобы форма прижалась к верху */
+        align-items: flex-start;
+    }
+    .login-container {
+        /* Убираем стили "коробки" и растягиваем на весь экран */
+        max-width: none;
+        width: 100%;
+        height: 100vh; /* 100% высоты окна браузера */
+        box-shadow: none;
+        border-radius: 0;
+        
+        /* Дополнительно центрируем поля внутри формы для красоты */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-sizing: border-box; /* Чтобы padding не ломал размеры */
+    }
+
+
 /* =================================================================== */
 /* ===== НАЧАЛО БЛОКА: СТИЛИ ДЛЯ ЭКРАНА РЕДАКТИРОВАНИЯ ЗАКАЗА ===== */
 /* =================================================================== */
