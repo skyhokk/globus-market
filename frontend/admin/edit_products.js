@@ -1,4 +1,4 @@
-// D:\globus-market\frontend\admin\edit_products.js
+// D:\globus-market\frontend\admin\edit_products.js - ФИНАЛЬНАЯ ВЕРСИЯ
 
 /**
  * Вспомогательная функция для экранирования кавычек в HTML-атрибутах
@@ -7,7 +7,6 @@ function escapeHTML(str) {
     if (typeof str !== 'string') return str;
     return str.replace(/"/g, '&quot;');
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ ---
@@ -29,7 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        productsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Загрузка товаров...</td></tr>`;
+        // Примечание: для админ-панели в идеале нужен отдельный эндпоинт, 
+        // который отдает ВСЕ товары, включая скрытые. Сейчас мы используем публичный,
+        // который отдает только видимые.
+        productsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Загрузка товаров...</td></tr>`;
 
         try {
             const response = await fetch(`${API_BASE_URL}/products`);
@@ -39,13 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
             productsTbody.innerHTML = ''; 
 
             if (products.length === 0) {
-                productsTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Товары не найдены.</td></tr>`;
+                productsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Товары не найдены.</td></tr>`;
                 return;
             }
             
-            // --- НОВАЯ ЛОГИКА: Рендер в зависимости от ширины экрана ---
+            // Рендер в зависимости от ширины экрана
             if (window.innerWidth > 768) {
-                // --- СТАНДАРТНЫЙ РЕНДЕР ТАБЛИЦЫ ДЛЯ ДЕСКТОПА (ВАШ ОРИГИНАЛЬНЫЙ КОД) ---
+                // --- РЕНДЕР ТАБЛИЦЫ ДЛЯ ДЕСКТОПА ---
                 products.forEach(product => {
                     const tr = document.createElement('tr');
                     tr.dataset.productId = product.id; 
@@ -59,13 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button type="button" class="upload-image-btn">Обновить</button>
                         </td>
                         <td><input type="number" class="product-stock" value="${product.stock || 0}" min="0" disabled data-original-value="${escapeHTML(product.stock || 0)}"></td>
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" class="product-visible-toggle" ${product.is_visible ? 'checked' : ''} data-original-value="${product.is_visible}">
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
                     `;
                     productsTbody.appendChild(tr);
                 });
             } else {
-                // --- НОВЫЙ РЕНДЕР КАРТОЧЕК ДЛЯ МОБИЛЬНЫХ ---
+                // --- РЕНДЕР КАРТОЧЕК ДЛЯ МОБИЛЬНЫХ ---
                 products.forEach(product => {
-                    const tr = document.createElement('tr'); // Используем tr как контейнер
+                    const tr = document.createElement('tr');
                     tr.dataset.productId = product.id;
                     tr.innerHTML = `
                         <td class="card-cell">
@@ -88,6 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                         </div>
                                     </div>
                                 </div>
+                                <div class="product-card-footer">
+                                     <label>Отображать на сайте</label>
+                                     <label class="switch">
+                                        <input type="checkbox" class="product-visible-toggle" ${product.is_visible ? 'checked' : ''} data-original-value="${product.is_visible}">
+                                        <span class="slider round"></span>
+                                     </label>
+                                </div>
                             </div>
                         </td>
                     `;
@@ -95,48 +110,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            document.querySelectorAll('.autosize-textarea').forEach(textarea => {
-                autosizeTextarea(textarea);
-            });
+            document.querySelectorAll('.autosize-textarea').forEach(autosizeTextarea);
 
         } catch (error) {
-            productsTbody.innerHTML = `<tr><td colspan="5" style="color: red; text-align:center;">${error.message}</td></tr>`;
+            productsTbody.innerHTML = `<tr><td colspan="6" style="color: red; text-align:center;">${error.message}</td></tr>`;
         }
     }
 
     /**
      * Функция #1: ЛОГИКА ПЕРЕКЛЮЧАТЕЛЯ ОСТАТКОВ
-     * Включает или отключает редактирование поля "Кол-во в базе" для всех товаров
      */
     function handleStockToggle() {
         const isEnabled = stockToggle.checked;
-        const stockInputs = productsTbody.querySelectorAll('.product-stock');
-        stockInputs.forEach(input => {
+        productsTbody.querySelectorAll('.product-stock').forEach(input => {
             input.disabled = !isEnabled;
         });
     }
 
     /**
      * Функция #2: ЛОГИКА ЗАГРУЗКИ ИЗОБРАЖЕНИЙ
-     * Загружает новое изображение для конкретного товара
      */
     async function uploadImage(productId, file) {
         const formData = new FormData();
         formData.append('file', file);
-
         try {
             const response = await fetch(`${API_BASE_URL}/products/${productId}/image`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка при загрузке изображения.');
-            }
-            
+            if (!response.ok) throw new Error('Ошибка при загрузке изображения.');
             alert('Изображение успешно обновлено!');
-
         } catch (error) {
             alert(error.message);
         }
@@ -144,39 +148,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Функция #3: ЛОГИКА СОХРАНЕНИЯ ВСЕХ ИЗМЕНЕНИЙ
-     * Собирает данные со всех полей и отправляет на бэкенд
      */
     async function saveAllChanges() {
         saveButton.disabled = true;
         saveStatus.textContent = 'Проверка изменений...';
-        saveStatus.style.color = 'black';
-
+        
         const updates = [];
         const changedProductNames = [];
-        const rows = productsTbody.querySelectorAll('tr');
+        const rows = productsTbody.querySelectorAll('tr[data-product-id]');
 
         rows.forEach(row => {
-            if (row.dataset.productId) {
-                const skuInput = row.querySelector('.product-sku');
-                const nameTextarea = row.querySelector('.product-name');
-                const priceInput = row.querySelector('.product-price');
-                const stockInput = row.querySelector('.product-stock');
+            const skuInput = row.querySelector('.product-sku');
+            const nameTextarea = row.querySelector('.product-name');
+            const priceInput = row.querySelector('.product-price');
+            const stockInput = row.querySelector('.product-stock');
+            const visibleToggle = row.querySelector('.product-visible-toggle');
 
-                const isSkuChanged = skuInput.value !== skuInput.dataset.originalValue;
-                const isNameChanged = nameTextarea.value !== nameTextarea.dataset.originalValue;
-                const isPriceChanged = priceInput.value !== priceInput.dataset.originalValue;
-                const isStockChanged = stockInput.value !== stockInput.dataset.originalValue;
-                
-                if (isSkuChanged || isNameChanged || isPriceChanged || isStockChanged) {
-                    updates.push({
-                        id: parseInt(row.dataset.productId),
-                        sku: skuInput.value,
-                        name: nameTextarea.value,
-                        price: parseFloat(priceInput.value),
-                        stock: parseInt(stockInput.value)
-                    });
-                    changedProductNames.push(nameTextarea.value);
-                }
+            const isSkuChanged = skuInput.value !== skuInput.dataset.originalValue;
+            const isNameChanged = nameTextarea.value !== nameTextarea.dataset.originalValue;
+            const isPriceChanged = priceInput.value !== priceInput.dataset.originalValue;
+            const isStockChanged = stockInput.value !== stockInput.dataset.originalValue;
+            const isVisibleChanged = visibleToggle.checked.toString() !== visibleToggle.dataset.originalValue;
+            
+            if (isSkuChanged || isNameChanged || isPriceChanged || isStockChanged || isVisibleChanged) {
+                updates.push({
+                    id: parseInt(row.dataset.productId),
+                    sku: skuInput.value,
+                    name: nameTextarea.value,
+                    price: parseFloat(priceInput.value),
+                    stock: parseInt(stockInput.value),
+                    is_visible: visibleToggle.checked
+                });
+                changedProductNames.push(nameTextarea.value);
             }
         });
 
@@ -192,21 +195,18 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/products/bulk-update`, {
                 method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ updates: updates })
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || 'Произошла неизвестная ошибка');
             }
 
-            saveStatus.textContent = `Успешно обновлено ${updates.length} товар(ов): ${changedProductNames.join(', ')}`;
+            saveStatus.textContent = `Успешно обновлено ${updates.length} товар(ов).`;
             saveStatus.style.color = 'green';
             
+            // Обновляем "оригинальные" значения после успешного сохранения
             updates.forEach(update => {
                 const row = productsTbody.querySelector(`tr[data-product-id="${update.id}"]`);
                 if (row) {
@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     row.querySelector('.product-name').dataset.originalValue = update.name;
                     row.querySelector('.product-price').dataset.originalValue = update.price;
                     row.querySelector('.product-stock').dataset.originalValue = update.stock;
+                    row.querySelector('.product-visible-toggle').dataset.originalValue = update.is_visible;
                 }
             });
 
@@ -226,23 +227,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Вспомогательная функция, которая устанавливает высоту textarea равной высоте ее содержимого
+     */
+    function autosizeTextarea(textarea) {
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }, false);
+    }
 
     // --- ПРИВЯЗКА ОБРАБОТЧИКОВ СОБЫТИЙ ---
-
     saveButton.addEventListener('click', saveAllChanges);
     stockToggle.addEventListener('change', handleStockToggle);
 
     productsTbody.addEventListener('click', event => {
         if (event.target.classList.contains('upload-image-btn')) {
-            const fileInput = event.target.nextElementSibling; // Находим следующий элемент, который является инпутом
-            if (fileInput && fileInput.classList.contains('image-upload-input')) {
-                fileInput.click();
-            } else { // Запасной вариант для десктопной версии
-                const fallbackInput = event.target.previousElementSibling;
-                if(fallbackInput && fallbackInput.classList.contains('image-upload-input')){
-                    fallbackInput.click();
-                }
-            }
+            const fileInput = event.target.closest('td, .product-card-mobile').querySelector('.image-upload-input');
+            if (fileInput) fileInput.click();
         }
     });
 
@@ -250,24 +252,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target.classList.contains('image-upload-input')) {
             const file = event.target.files[0];
             if (file) {
-                const tr = event.target.closest('tr');
-                const productId = tr.dataset.productId;
+                const productId = event.target.closest('tr[data-product-id]').dataset.productId;
                 uploadImage(productId, file);
             }
-        }
-    });
-
-    /**
-     * Вспомогательная функция, которая устанавливает высоту textarea равной высоте ее содержимого
-     */
-    function autosizeTextarea(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    productsTbody.addEventListener('input', event => {
-        if (event.target.classList.contains('autosize-textarea')) {
-            autosizeTextarea(event.target);
         }
     });
 

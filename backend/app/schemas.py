@@ -34,7 +34,8 @@ class Product(ProductBase):
     id: int
     image_url: Optional[str] = None
     subcategory_id: int 
-    updated_at: Optional[datetime] = None    
+    updated_at: Optional[datetime] = None
+    is_visible: bool    
     class Config:
         orm_mode = True
 
@@ -179,6 +180,7 @@ class ProductUpdate(BaseModel):
     name: Optional[str] = None
     price: Optional[float] = None
     stock: Optional[int] = None
+    is_visible: Optional[bool] = None 
 
 class ProductBulkUpdate(BaseModel):
     updates: List[ProductUpdate]

@@ -463,6 +463,8 @@ def bulk_update_products(
             product.price = item_update.price
         if item_update.stock is not None:
             product.stock = item_update.stock
+        if item_update.is_visible is not None:
+            product.is_visible = item_update.is_visible        
         
         updated_count += 1
 

@@ -32,6 +32,9 @@ def get_products(
 
     query = db.query(models.Product)
     
+    # Показываем только видимые товары
+    query = query.filter(models.Product.is_visible == True)
+    
     # --- НАЧАЛО УПРОЩЕННОЙ ЛОГИКИ ПОИСКА ---
     if search:
         # Убираем все преобразования в нижний регистр.

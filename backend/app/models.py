@@ -38,6 +38,7 @@ class Product(Base):
     price = Column(Float)
     image_url = Column(String, nullable=True)
     stock = Column(Integer, default=0)
+    is_visible = Column(Boolean, default=True, nullable=False)
     
     # --- ИЗМЕНЕНИЕ: Добавляем связь с подкатегорией ---
     subcategory_id = Column(Integer, ForeignKey("subcategories.id"))
