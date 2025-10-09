@@ -22,7 +22,10 @@ def get_categories(db: Session = Depends(get_db)):
     
     for cat in categories:
         for subcat in cat.subcategories:
-            count = db.query(func.count(models.Product.id)).filter(models.Product.subcategory_id == subcat.id).scalar()
+            count = db.query(func.count(models.Product.id)).filter(
+                models.Product.subcategory_id == subcat.id, 
+                models.Product.is_visible == True
+            ).scalar()
             subcat.product_count = count
             
     return categories

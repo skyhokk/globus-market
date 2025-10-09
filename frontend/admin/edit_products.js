@@ -34,7 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         productsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Загрузка товаров...</td></tr>`;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/products`);
+            const response = await fetch(`${API_BASE_URL}/admin/products/all`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (!response.ok) throw new Error('Не удалось загрузить список товаров');
             
             const products = await response.json();

@@ -55,7 +55,17 @@ class OrderUpdate(BaseModel):
     discount_percent: Optional[float] = None
     status: Optional[str] = None
 
-
+# --- НОВЫЙ ЭНДПОИНТ для получения ВСЕХ товаров в админке ---
+@router.get("/products/all", response_model=List[schemas.Product])
+def get_all_products_for_admin(
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin_user)
+):
+    """
+    Возвращает абсолютно все товары (включая скрытые) для Редактора товаров.
+    """
+    all_products = db.query(models.Product).order_by(models.Product.name).all()
+    return all_products
 
 # --- НОВЫЙ ЭНДПОИНТ для получения ОДНОГО заказа по ID ---
 @router.get("/orders/{order_id}", response_model=schemas.Order)
