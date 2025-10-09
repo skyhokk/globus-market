@@ -47,7 +47,9 @@ def get_public_settings(db: Session = Depends(get_db)):
 
     public_keys = [
         "contact_whatsapp", 
-        "contact_instagram", 
+        "contact_instagram_1", 
+        "contact_instagram_2", 
+        "contact_instagram_3", 
         "contact_telegram", 
         "contact_whatsapp_display" 
     ]

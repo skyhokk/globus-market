@@ -34,7 +34,9 @@ def seed_data():
             models.AppSettings(key="ignore_stock_limits", value="false"),
             models.AppSettings(key="contact_whatsapp", value=""),
             models.AppSettings(key="contact_whatsapp_display", value=""),
-            models.AppSettings(key="contact_instagram", value=""),
+            models.AppSettings(key="contact_instagram_1", value=""),
+            models.AppSettings(key="contact_instagram_2", value=""),
+            models.AppSettings(key="contact_instagram_3", value=""),
             models.AppSettings(key="contact_telegram", value="")
         ]
         db.add_all(settings_to_create)

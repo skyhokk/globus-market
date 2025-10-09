@@ -33,6 +33,7 @@ async function loadContacts() {
         
         let contactsHTML = '';
 
+        // WhatsApp
         if (settings.contact_whatsapp && settings.contact_whatsapp_display) {
             contactsHTML += `
                 <a href="${settings.contact_whatsapp}" target="_blank">
@@ -40,13 +41,22 @@ async function loadContacts() {
                     ${settings.contact_whatsapp_display}
                 </a>`;
         }
-        if (settings.contact_instagram) {
-            contactsHTML += `
-                <a href="${settings.contact_instagram}" target="_blank">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="contact-icon" alt="Instagram">
-                    Instagram
-                </a>`;
-        }
+        
+        // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+        // Instagram (проверяем все 3 ссылки)
+        [1, 2, 3].forEach(i => {
+            const key = `contact_instagram_${i}`;
+            if (settings[key]) {
+                contactsHTML += `
+                    <a href="${settings[key]}" target="_blank">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="contact-icon" alt="Instagram">
+                        Instagram ${i}
+                    </a>`;
+            }
+        });
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
+        // Telegram
         if (settings.contact_telegram) {
             contactsHTML += `
                 <a href="${settings.contact_telegram}" target="_blank">
