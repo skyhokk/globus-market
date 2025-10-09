@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     tr.innerHTML = `
                         <td><input type="text" class="product-sku" value="${escapeHTML(product.sku || '')}" data-original-value="${escapeHTML(product.sku || '')}"></td>
-                        <td><textarea class="product-name autosize-textarea" rows="1" data-original-value="${escapeHTML(product.name || '')}">${product.name || ''}</textarea></td>
+                        <td><textarea class="product-name" rows="1" data-original-value="${escapeHTML(product.name || '')}">${product.name || ''}</textarea></td>
                         <td><input type="number" class="product-price" value="${product.price || 0}" min="0" step="0.01" data-original-value="${escapeHTML(product.price || 0)}"></td>
                         <td style="text-align: center;">
                             <input type="file" class="image-upload-input" style="display: none;" accept="image/*">
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <input type="file" class="image-upload-input" style="display: none;" accept="image/*">
                                 </div>
                                 <div class="product-card-body">
-                                    <textarea class="product-name autosize-textarea" rows="1" data-original-value="${escapeHTML(product.name || '')}">${product.name || ''}</textarea>
+                                    <textarea class="product-name" rows="1" data-original-value="${escapeHTML(product.name || '')}">${product.name || ''}</textarea>
                                     <div class="product-card-inputs">
                                         <div class="input-group">
                                             <label>Цена</label>
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            document.querySelectorAll('.autosize-textarea').forEach(autosizeTextarea);
+            
 
         } catch (error) {
             productsTbody.innerHTML = `<tr><td colspan="6" style="color: red; text-align:center;">${error.message}</td></tr>`;
@@ -229,15 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Вспомогательная функция, которая устанавливает высоту textarea равной высоте ее содержимого
-     */
-    function autosizeTextarea(textarea) {
-        textarea.addEventListener('input', () => {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }, false);
-    }
 
     // --- ПРИВЯЗКА ОБРАБОТЧИКОВ СОБЫТИЙ ---
     saveButton.addEventListener('click', saveAllChanges);

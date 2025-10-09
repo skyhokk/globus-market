@@ -406,8 +406,10 @@ input:disabled { background-color: #e9ecef; cursor: not-allowed; border-color: #
 #products-table input[type="text"], #products-table input[type="number"], #products-table textarea {
     width: 100%; box-sizing: border-box; padding: 8px; font-size: 14px;
     border: 1px solid #ccc; border-radius: 4px; font-family: inherit;
-    line-height: 1.5; resize: none; overflow: hidden;
+    line-height: 1.5;
+    resize: vertical; /* Разрешаем растягивание по вертикали */
 }
+
 #products-table td:nth-child(1) { width: 15%; } #products-table td:nth-child(2) { width: 45%; }
 #products-table td:nth-child(3) { width: 15%; } #products-table td:nth-child(4) { width: 120px; }
 #products-table td:nth-child(5) { width: 15%; }
